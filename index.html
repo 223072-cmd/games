@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>絵文字神経衰弱</title>
+<style>
+  /* ===== ここを変えると見た目がかわる ===== */
+  :root {
+    --bg: #EDF9F4;        /* 背景の色 */
+    --main: #3FA98E;      /* カードの裏の色 */
+    --text: #3A2F40;      /* 文字の色 */
+  }
+  /* ====================================== */
+  body { margin: 0; font-family: "Hiragino Sans", "BIZ UDPGothic", sans-serif; background: var(--bg); color: var(--text); text-align: center; padding: 30px 16px; }
+  h1 { font-size: 1.5rem; margin: 0 0 6px; }
+  .board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; max-width: 360px; margin: 20px auto; }
+  .card { aspect-ratio: 1; font-size: 2rem; border: none; border-radius: 16px; background: var(--main); cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.12); color: transparent; transition: transform 0.2s; }
+  .card.open { background: #fff; color: inherit; transform: rotateY(180deg); }
+  .card.done { background: #fff; color: inherit; opacity: 0.55; }
+  #result { font-size: 1.2rem; font-weight: bold; min-height: 2em; }
+</style>
+</head>
+<body>
+
+<!-- ===== ここを変えるとゲームの内容がかわる ===== -->
+<h1>🍰 スイーツ神経衰弱</h1>
+<p>おなじスイーツのペアを見つけよう</p>
+<!-- ============================================ -->
+
+<p>めくった回数: <span id="moves">0</span></p>
+<div class="board" id="board"></div>
+<div id="result"></div>
+
+<script>
+  // ===== ここを変えるとカードの絵柄がかわる(8つ) =====
+  var EMOJI = ["🍰", "🍩", "🍪", "🧁", "🍫", "🍭", "🍮", "🍦"];
+  var MSG_CLEAR = "🎉 クリア! おつかれさま!";
+  // ==================================================
+
+  var cards = EMOJI.concat(EMOJI).sort(function () { return Math.random() - 0.5; });
+  var board = document.getElementById("board");
+  var first = null, lock = false, moves = 0, done = 0;
+
+  cards.forEach(function (e) {
+    var b = document.createElement("button");
+    b.className = "card"; b.textContent = e;
+    b.addEventListener("click", function () { flip(b); });
+    board.appendChild(b);
+  });
+
+  function flip(b) {
+    if (lock || b.classList.contains("open") || b.classList.contains("done")) return;
+    b.classList.add("open");
+    if (!first) { first = b; return; }
+    moves++; document.getElementById("moves").textContent = moves;
+    if (first.textContent === b.textContent) {
+      first.classList.add("done"); b.classList.add("done"); first = null; done++;
+      if (done === EMOJI.length) { document.getElementById("result").textContent = MSG_CLEAR + " (" + moves + "回)"; }
+    } else {
+      lock = true;
+      var a = first; first = null;
+      setTimeout(function () { a.classList.remove("open"); b.classList.remove("open"); lock = false; }, 700);
+    }
+  }
+</script>
+</body>
+</html>
